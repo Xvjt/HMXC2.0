@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="体验茶沫作画艺术">
+    <title>茶沫作画 - 梦华寻茶录</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 茶沫作画页 -->
+        <section class="tea-art" aria-labelledby="tea-art-title">
+            <h2 class="visually-hidden" id="tea-art-title">茶沫作画</h2>
+            <div class="tea-foam-canvas" role="canvas" aria-label="茶沫作画区域"></div>
+            <a href="6FenXIang.html" class="draw-hint" aria-label="继续作画提示">点击继续</a>
+            <p class="drawing-instructions">拖动茶匕在茶沫上作画</p>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="3DianCha.html" class="nav-btn" aria-label="返回上一步">← 返回上一页</a>
+            </div>
+        </section>
+    </div>
+    
+    <script>
+        // 原有的绘制交互JavaScript代码保持不变
+        document.addEventListener('DOMContentLoaded', () => {
+            const canvas = document.querySelector('.tea-foam-canvas');
+            
+            // 简单的绘制效果
+            let isDrawing = false;
+            let lastX, lastY;
+            
+            function startDrawing(e) {
+                isDrawing = true;
+                const touchOrMouseEvent = e.type.includes('mouse') ? e : e.touches[0];
+                const rect = canvas.getBoundingClientRect();
+                lastX = touchOrMouseEvent.clientX - rect.left;
+                lastY = touchOrMouseEvent.clientY - rect.top;
+                
+                // 创建一个绘制点
+                createDrawPoint(lastX, lastY);
+            }
+            
+            function draw(e) {
+                if (!isDrawing) return;
+                
+                const touchOrMouseEvent = e.type.includes('mouse') ? e : e.touches[0];
+                const rect = canvas.getBoundingClientRect();
+                const x = touchOrMouseEvent.clientX - rect.left;
+                const y = touchOrMouseEvent.clientY - rect.top;
+                
+                // 创建绘制点
+                createDrawPoint(x, y);
+                
+                lastX = x;
+                lastY = y;
+            }
+            
+            function endDrawing() {
+                isDrawing = false;
+            }
+            
+            function createDrawPoint(x, y) {
+                const dot = document.createElement('div');
+                dot.style.position = 'absolute';
+                dot.style.left = `${x - 5}px`;
+                dot.style.top = `${y - 5}px`;
+                dot.style.width = '10px';
+                dot.style.height = '10px';
+                dot.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
+                dot.style.borderRadius = '50%';
+                dot.style.pointerEvents = 'none';
+                canvas.appendChild(dot);
+                
+                // 添加淡出效果
+                setTimeout(() => {
+                    dot.style.transition = 'opacity 1s ease';
+                    dot.style.opacity = '0';
+                    setTimeout(() => {
+                        if (dot.parentNode === canvas) {
+                            canvas.removeChild(dot);
+                        }
+                    }, 1000);
+                }, 3000);
+            }
+            
+            // 添加事件监听器
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('touchstart', startDrawing, { passive: false });
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('touchmove', draw, { passive: false });
+            canvas.addEventListener('mouseup', endDrawing);
+            canvas.addEventListener('touchend', endDrawing);
+            canvas.addEventListener('mouseleave', endDrawing);
+        });
+    </script>
+</body>
+</html>

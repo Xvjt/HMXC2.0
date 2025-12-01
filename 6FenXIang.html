@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="点茶传承证书">
+    <title>点茶传承证书 - 梦华寻茶录</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 证书生成页 -->
+        <section class="certificate" id="certificate" aria-labelledby="certificate-title">
+            <div class="certificate-content">
+                <h2 class="certificate-title" id="certificate-title">点茶传承证书</h2>
+                <p>兹证明：[用户微信昵称]</p>
+                <p>于今日完整习得宋代点茶七步法，体悟茶百戏之妙</p>
+                <p>特封为「风雅茶人」</p>
+                <p>《梦华寻茶录》</p>
+            </div>
+            <button class="share-btn" id="shareBtn" aria-label="分享证书">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="18" cy="5" r="3"></circle>
+                    <circle cx="6" cy="12" r="3"></circle>
+                    <circle cx="18" cy="19" r="3"></circle>
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                </svg>
+                转发分享给好友
+            </button>
+            
+            <div style="text-align: center; margin-top: 50px;">
+                <a href="7End.html" class="nav-btn" aria-label="前往下一步">继续 →</a>
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="4ChaBaiXi.html" class="nav-btn" aria-label="返回上一步">← 返回上一页</a>
+            </div>
+        </section>
+    </div>
+    
+    <script>
+        // 原有的分享功能JavaScript代码保持不变
+        document.addEventListener('DOMContentLoaded', () => {
+            const shareBtn = document.getElementById('shareBtn');
+            
+            // 分享按钮功能
+            shareBtn?.addEventListener('click', function() {
+                // 在实际项目中实现分享功能
+                if (navigator.share) {
+                    navigator.share({
+                        title: '梦华寻茶录 - 宋代点茶文化之旅',
+                        text: '我已完成宋代点茶技艺学习，获得了点茶传承证书！',
+                        url: window.location.href
+                    }).catch(err => console.error('分享失败:', err));
+                } else {
+                    // 复制链接到剪贴板作为替代
+                    navigator.clipboard.writeText(window.location.href).then(() => {
+                        alert('链接已复制到剪贴板！');
+                    }).catch(() => {
+                        alert('分享功能已触发！');
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

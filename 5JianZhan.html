@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="选择斗茶器体验">
+    <title>选择斗茶器 - 梦华寻茶录</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 斗茶器选择页 -->
+        <section class="tea-fight" aria-labelledby="tea-fight-title">
+            <h2 class="visually-hidden" id="tea-fight-title">选择斗茶器</h2>
+            <div class="selection-group" role="radiogroup" aria-label="选择您喜欢的斗茶器">
+                <div>
+                    <div class="option-circle" data-choice="汤色" role="radio" tabindex="0" aria-checked="false">
+                        <div>汤色</div>
+                    </div>
+                    <button class="choice-btn">点击选择</button>
+                    <p style="margin-top: 10px; max-width: 300px; text-align: center;">二看汤色：以匀白为上。一看汤花：以匀润、持久为胜。点好的茶，要以较高下。</p>
+                </div>
+                
+                <div>
+                    <div class="option-bowl" data-choice="建盏" role="radio" tabindex="0" aria-checked="false">
+                        <div>建盏</div>
+                    </div>
+                    <button class="choice-btn">点击选择</button>
+                    <p style="margin-top: 10px; max-width: 300px; text-align: center;">窑变产生的"曜变"、"兔毫"纹络，更是天成之美。宋代点茶，尤爱黑釉建盏。其深沉的底色，能完美衬托出雪白的沫饽。</p>
+                </div>
+            </div>
+            <button class="confirm-btn" id="confirmBtn" aria-label="确认选择" disabled>
+                <a href="6FenXIang.html" style="text-decoration: none; color: inherit; display: block; width: 100%; height: 100%;">确认选择</a>
+            </button>
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="4ChaBaiXi.html" class="nav-btn" aria-label="返回上一步">← 返回上一页</a>
+            </div>
+        </section>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const options = document.querySelectorAll('.option-circle, .option-bowl');
+            const confirmBtn = document.getElementById('confirmBtn');
+            
+            // 选项选择处理
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    options.forEach(el => {
+                        el.classList.remove('selected');
+                        el.setAttribute('aria-checked', 'false');
+                    });
+                    this.classList.add('selected');
+                    this.setAttribute('aria-checked', 'true');
+                    
+                    // 启用确认按钮
+                    if (confirmBtn) {
+                        confirmBtn.disabled = false;
+                    }
+                });
+                
+                // 键盘支持
+                option.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        option.click();
+                    }
+                });
+            });
+            
+            // 为选择按钮添加事件
+            document.querySelectorAll('.choice-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const option = this.previousElementSibling;
+                    if (option && (option.classList.contains('option-circle') || option.classList.contains('option-bowl'))) {
+                        option.click();
+                    }
+                });
+            });
+            
+            // 阻止未启用的确认按钮点击事件
+            confirmBtn?.addEventListener('click', function(e) {
+                if (this.disabled) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

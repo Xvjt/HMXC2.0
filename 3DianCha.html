@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="点茶步骤详解">
+    <title>点茶步骤 - 梦华寻茶录</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 互动步骤页 - 支持横向滑动的子页面 -->
+        <section class="roast-tea" aria-labelledby="roast-title">
+            <h2 id="roast-title">点茶步骤</h2>
+            
+            <!-- 滑动容器 -->
+            <div class="slide-container" role="region" aria-label="点茶步骤展示">
+                <div class="slide-track">
+                    <!-- 子页面1：炙茶 -->
+                    <div class="slide-item" id="slide-0">
+                        <h3>炙茶</h3>
+                        <div class="teapot-illustration">
+                            <div class="draggable" style="font-size: 2rem;" draggable="true">🫖</div>
+                        </div>
+                        <div class="hint-box">将团茶用微火烘烤，去除水分</div>
+                    </div>
+                    
+                    <!-- 子页面2：碾茶 -->
+                    <div class="slide-item" id="slide-1">
+                        <h3>碾茶</h3>
+                        <div class="teapot-illustration">
+                            <div class="draggable" style="font-size: 2rem;" draggable="true">🪓</div>
+                        </div>
+                        <div class="hint-box">将烤好的茶饼碾碎成小块</div>
+                    </div>
+                    
+                    <!-- 子页面3：磨茶 -->
+                    <div class="slide-item" id="slide-2">
+                        <h3>磨茶</h3>
+                        <div class="teapot-illustration">
+                            <div class="draggable" style="font-size: 2rem;" draggable="true">🫘</div>
+                        </div>
+                        <div class="hint-box">用茶磨将茶块磨成细腻的茶粉</div>
+                    </div>
+                    
+                    <!-- 子页面4：茶盒 -->
+                    <div class="slide-item" id="slide-3">
+                        <h3>茶盒</h3>
+                        <div class="teapot-illustration">
+                            <div class="draggable" style="font-size: 2rem;" draggable="true">📦</div>
+                        </div>
+                        <div class="hint-box">将茶粉装入茶盒中备用</div>
+                    </div>
+                </div>
+                
+                <!-- 滑动控制按钮 -->
+                <button class="slide-control prev" aria-label="上一步">‹</button>
+                <button class="slide-control next" aria-label="下一步">›</button>
+            </div>
+            
+            <!-- 滑动指示器 -->
+            <div class="slide-indicators" role="tablist" aria-label="步骤导航">
+                <div class="indicator active" data-index="0" role="tab" aria-selected="true" aria-controls="slide-0" tabindex="0"></div>
+                <div class="indicator" data-index="1" role="tab" aria-selected="false" aria-controls="slide-1" tabindex="0"></div>
+                <div class="indicator" data-index="2" role="tab" aria-selected="false" aria-controls="slide-2" tabindex="0"></div>
+                <div class="indicator" data-index="3" role="tab" aria-selected="false" aria-controls="slide-3" tabindex="0"></div>
+            </div>
+            
+            <!-- 工具选择 -->
+            <div class="tool-selection" role="group" aria-label="选择工具">
+                <div class="tool-item" data-tool="炙茶" role="button" tabindex="0">炙茶</div>
+                <div class="tool-item" data-tool="碾茶" role="button" tabindex="0">碾茶</div>
+                <div class="tool-item" data-tool="磨茶" role="button" tabindex="0">磨茶</div>
+                <div class="tool-item" data-tool="茶盒" role="button" tabindex="0">茶盒</div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 50px;">
+                <a href="4ChaBaiXi.html" class="nav-btn" aria-label="前往下一步">继续体验 →</a>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="2JianJie.html" class="nav-btn" aria-label="返回上一步">← 返回上一页</a>
+            </div>
+        </section>
+    </div>
+    
+    <script>
+        // 页面内交互逻辑 - 滑动功能和拖拽功能
+        document.addEventListener('DOMContentLoaded', () => {
+            // DOM 元素缓存
+            const cache = {
+                slideContainer: document.querySelector('.slide-container'),
+                slideTrack: document.querySelector('.slide-track'),
+                slideItems: document.querySelectorAll('.slide-item'),
+                slideControls: document.querySelectorAll('.slide-control'),
+                indicators: document.querySelectorAll('.indicator'),
+                toolItems: document.querySelectorAll('.tool-item'),
+                draggableElements: document.querySelectorAll('.draggable')
+            };
+            
+            // 状态变量
+            let currentSlideIndex = 0;
+            
+            // 实现roast-tea页面的横向滑动功能
+            function initSlideFeatures() {
+                if (!cache.slideContainer || !cache.slideTrack) return;
+                
+                // 计算每个滑动项的宽度
+                function getSlideWidth() {
+                    return cache.slideContainer.offsetWidth;
+                }
+                
+                // 移动到指定的滑动项
+                function goToSlide(index) {
+                    // 边界检查
+                    const safeIndex = Math.max(0, Math.min(index, cache.slideItems.length - 1));
+                    
+                    if (currentSlideIndex === safeIndex) return; // 无需移动
+                    
+                    currentSlideIndex = safeIndex;
+                    const slideWidth = getSlideWidth();
+                    cache.slideTrack.style.transform = `translateX(-${safeIndex * slideWidth}px)`;
+                    
+                    // 更新指示器状态
+                    cache.indicators.forEach((indicator, i) => {
+                        const isActive = i === safeIndex;
+                        indicator.classList.toggle('active', isActive);
+                        indicator.setAttribute('aria-selected', isActive.toString());
+                    });
+                    
+                    // 同步工具选择状态
+                    cache.toolItems.forEach((item, i) => {
+                        item.classList.toggle('active', i === safeIndex);
+                    });
+                    
+                    // 设置当前活动滑块的可访问性
+                    cache.slideItems.forEach((item, i) => {
+                        item.setAttribute('aria-hidden', (i !== safeIndex).toString());
+                    });
+                }
+                
+                // 初始化滑动状态
+                cache.slideItems.forEach((item, i) => {
+                    item.setAttribute('aria-hidden', (i !== currentSlideIndex).toString());
+                });
+                
+                // 按钮控制事件
+                cache.slideControls.forEach(control => {
+                    control.addEventListener('click', () => {
+                        goToSlide(control.classList.contains('prev') ? 
+                            currentSlideIndex - 1 : currentSlideIndex + 1);
+                    });
+                });
+                
+                // 指示器点击事件
+                cache.indicators.forEach(indicator => {
+                    indicator.addEventListener('click', () => {
+                        const index = parseInt(indicator.dataset.index, 10);
+                        goToSlide(index);
+                    });
+                    
+                    // 键盘控制
+                    indicator.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            const index = parseInt(indicator.dataset.index, 10);
+                            goToSlide(index);
+                        }
+                    });
+                });
+                
+                // 拖动相关变量
+                let isDragging = false;
+                let startX;
+                let startScrollLeft;
+                
+                // 拖动开始
+                function startDrag(e) {
+                    isDragging = true;
+                    startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+                    startScrollLeft = -parseInt(cache.slideTrack.style.transform.replace('translateX(-', '')) || 0;
+                    
+                    // 移除过渡效果，实现平滑拖动
+                    cache.slideTrack.style.transition = 'none';
+                    
+                    // 添加拖动时的视觉反馈
+                    cache.slideContainer.style.cursor = 'grabbing';
+                    cache.slideContainer.style.userSelect = 'none';
+                }
+                
+                // 拖动中
+                function drag(e) {
+                    if (!isDragging) return;
+                    e.preventDefault(); // 防止页面滚动
+                    
+                    const x = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+                    const walk = (x - startX) * 1.5; // 拖动速度因子
+                    const newScrollLeft = startScrollLeft + walk;
+                    
+                    // 边界检查
+                    const maxScrollLeft = (cache.slideItems.length - 1) * getSlideWidth();
+                    const boundedScrollLeft = Math.max(0, Math.min(newScrollLeft, maxScrollLeft));
+                    
+                    cache.slideTrack.style.transform = `translateX(-${boundedScrollLeft}px)`;
+                }
+                
+                // 拖动结束
+                function endDrag() {
+                    if (!isDragging) return;
+                    isDragging = false;
+                    
+                    // 恢复过渡效果
+                    cache.slideTrack.style.transition = `transform var(--slide-transition)`;
+                    cache.slideContainer.style.cursor = '';
+                    cache.slideContainer.style.userSelect = '';
+                    
+                    // 计算应该切换到哪个幻灯片
+                    const slideWidth = getSlideWidth();
+                    const currentPosition = -parseInt(cache.slideTrack.style.transform.replace('translateX(-', '')) || 0;
+                    const nearestSlideIndex = Math.round(currentPosition / slideWidth);
+                    
+                    goToSlide(nearestSlideIndex);
+                }
+                
+                // 触摸滑动支持
+                cache.slideContainer.addEventListener('touchstart', startDrag, { passive: false });
+                cache.slideContainer.addEventListener('touchmove', drag, { passive: false });
+                cache.slideContainer.addEventListener('touchend', endDrag);
+                
+                // 鼠标拖动支持（模拟手指滑动）
+                cache.slideContainer.addEventListener('mousedown', startDrag);
+                document.addEventListener('mousemove', drag);
+                document.addEventListener('mouseup', endDrag);
+                document.addEventListener('mouseleave', endDrag); // 防止鼠标移出页面时状态卡住
+                
+                // 返回goToSlide函数供外部使用
+                return goToSlide;
+            }
+            
+            // 初始化滑动功能
+            const goToSlide = initSlideFeatures();
+            
+            // 为可拖拽元素添加拖拽功能
+            function initDraggableElements() {
+                cache.draggableElements.forEach(element => {
+                    let isDraggingElement = false;
+                    let offsetX, offsetY;
+                    
+                    function startElementDrag(e) {
+                        isDraggingElement = true;
+                        
+                        const rect = element.getBoundingClientRect();
+                        const touchOrMouseEvent = e.type === 'mousedown' ? e : e.touches[0];
+                        
+                        offsetX = touchOrMouseEvent.clientX - rect.left;
+                        offsetY = touchOrMouseEvent.clientY - rect.top;
+                        
+                        // 确保元素可以被拖动
+                        element.style.position = 'relative';
+                        element.style.zIndex = '100';
+                        element.style.willChange = 'transform';
+                    }
+                    
+                    function dragElement(e) {
+                        if (!isDraggingElement) return;
+                        e.preventDefault();
+                        
+                        const touchOrMouseEvent = e.type === 'mousemove' ? e : e.touches[0];
+                        
+                        const parentRect = element.parentElement.getBoundingClientRect();
+                        const elementRect = element.getBoundingClientRect();
+                        
+                        // 计算新位置并进行边界检查
+                        let newLeft = touchOrMouseEvent.clientX - parentRect.left - offsetX;
+                        let newTop = touchOrMouseEvent.clientY - parentRect.top - offsetY;
+                        
+                        // 边界检查 - 确保元素不会被拖出父容器
+                        newLeft = Math.max(0, Math.min(newLeft, parentRect.width - elementRect.width));
+                        newTop = Math.max(0, Math.min(newTop, parentRect.height - elementRect.height));
+                        
+                        element.style.left = `${newLeft}px`;
+                        element.style.top = `${newTop}px`;
+                    }
+                    
+                    function endElementDrag() {
+                        if (!isDraggingElement) return;
+                        isDraggingElement = false;
+                        element.style.willChange = '';
+                    }
+                    
+                    // 添加事件监听器
+                    element.addEventListener('mousedown', startElementDrag);
+                    element.addEventListener('touchstart', startElementDrag, { passive: false });
+                    document.addEventListener('mousemove', dragElement);
+                    document.addEventListener('touchmove', dragElement, { passive: false });
+                    document.addEventListener('mouseup', endElementDrag);
+                    document.addEventListener('touchend', endElementDrag);
+                    document.addEventListener('mouseleave', endElementDrag); // 防止鼠标移出页面时状态卡住
+                    
+                    // 原生拖放支持
+                    element.addEventListener('dragstart', (e) => {
+                        e.dataTransfer.setData('text/plain', 'dragging');
+                    });
+                });
+            }
+            
+            // 初始化可拖拽元素
+            initDraggableElements();
+            
+            // 使用事件委托处理工具选择
+            document.querySelector('.tool-selection')?.addEventListener('click', (e) => {
+                if (e.target.classList.contains('tool-item')) {
+                    const toolIndex = Array.from(cache.toolItems).indexOf(e.target);
+                    
+                    // 同步工具选择与滑动位置
+                    if (goToSlide) {
+                        goToSlide(toolIndex);
+                    }
+                }
+            });
+            
+            // 工具选择键盘支持
+            cache.toolItems.forEach((item, index) => {
+                item.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        if (goToSlide) {
+                            goToSlide(index);
+                        }
+                    }
+                });
+            });
+            
+            // 优化响应式处理
+            function handleResize() {
+                // 重新计算滑动位置
+                if (cache.slideTrack && goToSlide) {
+                    // 保存当前索引并重新定位，确保在窗口调整后位置正确
+                    const tempIndex = currentSlideIndex;
+                    currentSlideIndex = -1; // 强制重新计算
+                    goToSlide(tempIndex);
+                }
+            }
+            
+            // 使用节流函数优化窗口调整事件
+            function throttle(func, delay) {
+                let lastCall = 0;
+                return function(...args) {
+                    const now = new Date().getTime();
+                    if (now - lastCall < delay) return;
+                    lastCall = now;
+                    return func(...args);
+                };
+            }
+            
+            window.addEventListener('resize', throttle(handleResize, 200));
+            handleResize(); // 初始调用
+        });
+    </script>
+</body>
+</html>
