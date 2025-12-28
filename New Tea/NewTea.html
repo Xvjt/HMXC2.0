@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>茶百戏图片选择器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background: #f5f5f5 url("茶百戏背景.jpg") no-repeat center/cover;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            touch-action: manipulation;
+            position: relative;
+        }
+        
+        /* 主内容区域 - 精确控制位置 */
+        .main-content {
+            position: absolute;
+            top: 19%; /* 调整这个百分比：值越小越靠上，越大越靠下 */
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+        
+        /* 中心展示圆 */
+        .display-area {
+            width: 100%;
+            max-width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, .15);
+        }
+        .display-area img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        /* 滚动栏容器 - 固定在底部20%位置 */
+        .scroll-container-wrapper {
+            position: fixed;
+            bottom: 15%;      /* 调整到合适的位置 */
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            padding: 0 20px;
+            z-index: 10;
+        }
+        
+        /* 滚动条容器 */
+        .scroll-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            justify-content: center;
+        }
+        
+        /* 横向滚动条 - 每次显示3个图片 */
+        .image-scrollbar {
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            padding: 20px 0;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            width: calc(100% - 100px);
+            max-width: 500px;
+        }
+        .image-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        
+        /* 缩略图 - 每次显示3个 */
+        .thumbnail {
+            width: calc(33.333% - 10px);
+            min-width: 100px;
+            max-width: 150px;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            overflow: hidden;
+            cursor: pointer;
+            transition: .3s;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, .1);
+            flex-shrink: 0;
+        }
+        .thumbnail:active {
+            transform: scale(0.95);
+        }
+        .thumbnail.active {
+            border: 3px solid #4CAF50;
+            box-shadow: 0 0 0 2px #fff inset;
+        }
+        .thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        /* 左右按钮 - 使用本地素材，移除圆形白色背景 */
+        .scroll-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 30px;      /* 减小按钮大小 */
+            height: 30px;
+            background: transparent;  /* 移除白色背景 */
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: .3s;
+            z-index: 20;
+            touch-action: manipulation;
+            padding: 0;       /* 移除内边距 */
+        }
+        
+        .scroll-btn img {
+            width: 20px;      /* 调整图片大小 */
+            height: 20px;
+            object-fit: contain;
+            transition: .3s;
+        }
+        
+        .scroll-btn:active img {
+            transform: scale(0.9);  /* 点击时的缩放效果 */
+        }
+        
+        .scroll-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        
+        .prev-btn { left: 5px; }
+        .next-btn { right: 5px; }
+        
+        .scroll-btn span {
+            display: none;    /* 隐藏Unicode字符 */
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 480px) {
+            body {
+                padding: 15px;
+            }
+            .main-content {
+                margin-top: 5vh;
+            }
+            .display-area {
+                width: 250px;
+                height: 250px;
+            }
+            .scroll-container {
+                max-width: 400px;
+            }
+            .image-scrollbar {
+                width: calc(100% - 80px);
+                max-width: 350px;
+                gap: 12px;
+            }
+            .thumbnail {
+                width: calc(33.333% - 8px);
+                min-width: 80px;
+                max-width: 120px;
+            }
+            .scroll-btn {
+                width: 25px;
+                height: 25px;
+            }
+            
+            .scroll-btn img {
+                width: 18px;
+                height: 18px;
+            }
+            
+            .prev-btn { left: 2px; }
+            .next-btn { right: 2px; }
+            .scroll-container-wrapper {
+                padding: 0 15px;
+                bottom: 15%;
+            }
+        }
+
+        @media (max-width: 320px) {
+            .display-area {
+                width: 200px;
+                height: 200px;
+            }
+            .scroll-container {
+                max-width: 300px;
+            }
+            .image-scrollbar {
+                width: calc(100% - 60px);
+                max-width: 280px;
+                gap: 10px;
+            }
+            .thumbnail {
+                width: calc(33.333% - 6px);
+                min-width: 70px;
+                max-width: 100px;
+            }
+            .scroll-btn {
+                width: 22px;
+                height: 22px;
+            }
+            
+            .scroll-btn img {
+                width: 16px;
+                height: 16px;
+            }
+            .scroll-container-wrapper {
+                bottom: 10%;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .scroll-container {
+                max-width: 700px;
+            }
+            .image-scrollbar {
+                width: calc(100% - 120px);
+                max-width: 600px;
+                gap: 18px;
+            }
+            .thumbnail {
+                width: calc(33.333% - 12px);
+                min-width: 120px;
+                max-width: 180px;
+            }
+            .scroll-btn {
+                width: 35px;
+                height: 35px;
+            }
+            
+            .scroll-btn img {
+                width: 25px;
+                height: 25px;
+            }
+            
+            .scroll-btn:hover img {
+                transform: scale(1.1);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .scroll-container {
+                max-width: 800px;
+            }
+            .image-scrollbar {
+                width: calc(100% - 140px);
+                max-width: 700px;
+                gap: 20px;
+            }
+            .thumbnail {
+                width: calc(33.333% - 15px);
+                min-width: 140px;
+                max-width: 200px;
+            }
+        }
+
+        /* 防止双击缩放 */
+        * {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        /* 选择图片时的反馈 */
+        .thumbnail:focus {
+            outline: 2px solid #4CAF50;
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 中心大图 -->
+    <div class="main-content">
+        <div class="display-area">
+            <img id="selectedImage" src="沙盘.png" alt="茶百戏图案">
+        </div>
+    </div>
+
+    <!-- 滚动栏固定在底部20%位置 -->
+    <div class="scroll-container-wrapper">
+        <div class="scroll-container">
+            <button class="scroll-btn prev-btn" id="prevBtn" aria-label="上一张">
+                <img src="左.png" alt="上一张">
+            </button>
+
+            <div class="image-scrollbar" id="imageScrollbar">
+                <div class="thumbnail active" onclick="selectImage(this)" tabindex="0">
+                    <img src="比翼双飞.jpg" alt="比翼双飞">
+                </div>
+                <div class="thumbnail" onclick="selectImage(this)" tabindex="0">
+                    <img src="荷叶戏鱼.png" alt="荷叶戏鱼">
+                </div>
+                <div class="thumbnail" onclick="selectImage(this)" tabindex="0">
+                    <img src="马到成功.png" alt="马到成功">
+                </div>
+                <div class="thumbnail" onclick="selectImage(this)" tabindex="0">
+                    <img src="山水行舟.png" alt="山水行舟">
+                </div>
+                <div class="thumbnail" onclick="selectImage(this)" tabindex="0">
+                    <img src="双龙戏珠.png" alt="双龙戏珠">
+                </div>
+            </div>
+
+            <button class="scroll-btn next-btn" id="nextBtn" aria-label="下一张">
+                <img src="右.png" alt="下一张">
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const scrollbar = document.getElementById('imageScrollbar');
+        const thumbnails = document.querySelectorAll('.thumbnail');
+        const selectedImage = document.getElementById('selectedImage');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        let scrollDistance;
+
+        function initScrollDistance() {
+            if (thumbnails.length > 0) {
+                const thumbnailWidth = thumbnails[0].offsetWidth;
+                const gap = 15;
+                scrollDistance = thumbnailWidth + gap;
+                updateButtonStates();
+            }
+        }
+
+        // 更新按钮状态
+        function updateButtonStates() {
+            if (!scrollbar) return;
+            
+            const scrollLeft = scrollbar.scrollLeft;
+            const scrollWidth = scrollbar.scrollWidth;
+            const clientWidth = scrollbar.clientWidth;
+            
+            // 更新左按钮状态
+            prevBtn.disabled = scrollLeft <= 0;
+            prevBtn.style.opacity = scrollLeft <= 0 ? '0.3' : '1';
+            
+            // 更新右按钮状态
+            nextBtn.disabled = scrollLeft + clientWidth >= scrollWidth;
+            nextBtn.style.opacity = scrollLeft + clientWidth >= scrollWidth ? '0.3' : '1';
+        }
+
+        // 选择图片
+        function selectImage(thumb) {
+            thumbnails.forEach(t => t.classList.remove('active'));
+            thumb.classList.add('active');
+            selectedImage.src = thumb.querySelector('img').src;
+            
+            // 移动端触摸反馈
+            thumb.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                thumb.style.transform = '';
+            }, 150);
+        }
+
+        // 向左滚动
+        function scrollLeft() {
+            if (scrollDistance && !prevBtn.disabled) {
+                scrollbar.scrollBy({ 
+                    left: -scrollDistance, 
+                    behavior: 'smooth' 
+                });
+                
+                setTimeout(updateButtonStates, 300);
+            }
+        }
+
+        // 向右滚动
+        function scrollRight() {
+            if (scrollDistance && !nextBtn.disabled) {
+                scrollbar.scrollBy({ 
+                    left: scrollDistance, 
+                    behavior: 'smooth' 
+                });
+                
+                setTimeout(updateButtonStates, 300);
+            }
+        }
+
+        // 事件监听器
+        function setupEventListeners() {
+            // 按钮点击事件
+            prevBtn.addEventListener('click', scrollLeft);
+            nextBtn.addEventListener('click', scrollRight);
+            
+            // 触摸事件支持
+            prevBtn.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                scrollLeft();
+            });
+            
+            nextBtn.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                scrollRight();
+            });
+            
+            // 缩略图触摸事件
+            thumbnails.forEach(thumb => {
+                thumb.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    selectImage(this);
+                });
+            });
+            
+            // 滚动事件监听
+            scrollbar.addEventListener('scroll', updateButtonStates);
+            
+            // 窗口大小变化时重新计算
+            window.addEventListener('resize', function() {
+                initScrollDistance();
+                updateButtonStates();
+            });
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initScrollDistance();
+            setupEventListeners();
+        });
+
+        // 确保在图片加载后也能正确计算
+        window.addEventListener('load', function() {
+            initScrollDistance();
+            updateButtonStates();
+        });
+
+        // 防止移动端双击缩放
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function (event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+    </script>
+</body>
+</html>
